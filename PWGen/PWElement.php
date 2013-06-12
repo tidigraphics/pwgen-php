@@ -1,5 +1,5 @@
 <?php
-namespace PWGEn
+namespace PWGen;
 
 class PWElement
 {
