@@ -1,4 +1,6 @@
 <?php
+namespace PWGen;
+use PWGen\PWElement;
 
 /**
  * Port of the famous GNU/Linux Password Generator ("pwgen") to PHP.
@@ -442,14 +444,3 @@ class PWGen
 
 }
 
-class PWElement
-{
-    public $str;
-    public $flags;
-
-    public function __construct($str, $flags)
-    {
-        $this->str   = $str;
-        $this->flags = $flags;
-    }
-}
