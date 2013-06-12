@@ -1,5 +1,5 @@
 {
-    "name": "roderik/pwgen-php",
+    "name": "tidigraphics/pwgen-php",
     "type": "library",
     "description": "pwgen-php is a simple PHP class which aims to clone the GNU pwgen functionality.",
     "keywords": ["password", "generator"],
