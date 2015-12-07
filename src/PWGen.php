@@ -1,6 +1,5 @@
 <?php
 namespace PWGen;
-use PWGen\PWElement;
 
 /**
  * Port of the famous GNU/Linux Password Generator ("pwgen") to PHP.
