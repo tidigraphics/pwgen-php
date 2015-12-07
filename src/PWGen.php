@@ -9,22 +9,41 @@ namespace PWGen;
  */
 class PWGen
 {
-    // Flags for the pwgen function
+    /**
+     * Flags for the pwgen function
+     */
     const PW_DIGITS = 0x0001;
     const PW_UPPERS = 0x0002; // At least one upper letter
-    const PW_SYMBOLS   = 0x0004;
+    const PW_SYMBOLS = 0x0004;
     const PW_AMBIGUOUS = 0x0008;
 
-    // Flags for the pwgen element
+    /**
+     * Flags for the pwgen element
+     */
     const CONSONANT = 0x0001;
-    const VOWEL     = 0x0002;
+    const VOWEL = 0x0002;
     const DIPHTHONG = 0x0004;
     const NOT_FIRST = 0x0008;
     const NO_VOWELS = 0x0010;
 
+    /**
+     * @var string
+     */
     private $pwgen;
+
+    /**
+     * @var int
+     */
     private $pwgen_flags;
+
+    /**
+     * @var array|string
+     */
     private $password;
+
+    /**
+     * @var int
+     */
     private $pw_length;
 
     private static $initialized = false; // static block alread called?
@@ -72,12 +91,16 @@ class PWGen
         $this->setNumerals($numerals);
         $this->setCapitalize($capitalize);
         $this->setAmbiguous($ambiguous);
-        $this->setNoVovels($no_vowels);
+        $this->setNoVowels($no_vowels);
         $this->setSymbols($symbols);
     }
 
     /**
      * Length of the generated password. Default: 8
+     *
+     * @param int $length
+     *
+     * @return $this
      */
     public function setLength($length)
     {
@@ -95,6 +118,7 @@ class PWGen
         } else {
             $this->pw_length = 8;
         }
+
         return $this;
     }
 
@@ -104,6 +128,10 @@ class PWGen
      * taped to the monitor...
      * Please note that this function implies that you want passwords which include symbols, numerals and
      * capital letters.
+     *
+     * @param bool $secure
+     *
+     * @return $this
      */
     public function setSecure($secure)
     {
@@ -114,11 +142,16 @@ class PWGen
         } else {
             $this->pwgen = 'pw_phonemes';
         }
+
         return $this;
     }
 
     /**
      * Include at least one number in the password. This is the default.
+     *
+     * @param bool $numerals
+     *
+     * @return $this
      */
     public function setNumerals($numerals)
     {
@@ -127,11 +160,16 @@ class PWGen
         } else {
             $this->pwgen_flags &= ~self::PW_DIGITS;
         }
+
         return $this;
     }
 
     /**
      * Include at least one capital letter in the password. This is the default.
+     *
+     * @param bool $capitalize
+     *
+     * @return $this
      */
     public function setCapitalize($capitalize)
     {
@@ -140,6 +178,7 @@ class PWGen
         } else {
             $this->pwgen_flags &= ~self::PW_UPPERS;
         }
+
         return $this;
     }
 
@@ -148,6 +187,10 @@ class PWGen
      * 'O'. This reduces the number of possible passwords significantly, and as such reduces the quality of
      * the passwords. It may be useful for users who have bad vision, but in general use of this option is
      * not recommended.
+     *
+     * @param bool $ambiguous
+     *
+     * @return $this
      */
     public function setAmbiguous($ambiguous)
     {
@@ -156,6 +199,7 @@ class PWGen
         } else {
             $this->pwgen_flags &= ~self::PW_AMBIGUOUS;
         }
+
         return $this;
     }
 
@@ -163,19 +207,29 @@ class PWGen
      * Generate random passwords that do not contain vowels or numbers that might be mistaken for vowels. It
      * provides less secure passwords to allow system administrators to not have to worry with random
      * passwords accidentally contain offensive substrings.
+     *
+     * @param bool $noVowels
+     *
+     * @return $this
      */
-    public function setNoVovels($no_vovels)
+    public function setNoVowels($noVowels)
     {
-        if ($no_vovels) {
+        if ($noVowels) {
             $this->pwgen = 'pw_rand';
             $this->pwgen_flags |= self::NO_VOWELS | self::PW_DIGITS | self::PW_UPPERS;
         } else {
             $this->pwgen = 'pw_phonemes';
             $this->pwgen_flags &= ~self::NO_VOWELS;
         }
+
         return $this;
     }
 
+    /**
+     * @param bool $symbols
+     *
+     * @return $this
+     */
     public function setSymbols($symbols)
     {
         if ($symbols) {
@@ -183,9 +237,13 @@ class PWGen
         } else {
             $this->pwgen_flags &= ~self::PW_SYMBOLS;
         }
+
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function generate()
     {
         if ($this->pwgen == 'pw_phonemes') {
@@ -193,6 +251,7 @@ class PWGen
         } else { // $this->pwgen == 'pw_rand'
             $this->pw_rand();
         }
+
         return $this->password;
     }
 
@@ -232,13 +291,6 @@ class PWGen
                     continue;
                 }
 
-                // Handle the AMBIGUOUS flag
-                if ($this->pwgen_flags & self::PW_AMBIGUOUS) {
-                    if (strpbrk($str, self::$pw_ambiguous) !== false) {
-                        continue;
-                    }
-                }
-
                 /*
                  * OK, we found an element which matches our criteria,
                  * let's do it!
@@ -252,6 +304,13 @@ class PWGen
                     if (($first || $flags & self::CONSONANT) && (self::my_rand(0, 9) < 2)) {
                         $this->password[$c] = strtoupper($this->password[$c]);
                         $feature_flags &= ~self::PW_UPPERS;
+                    }
+                }
+
+                // Handle the AMBIGUOUS flag
+                if ($this->pwgen_flags & self::PW_AMBIGUOUS) {
+                    if (strpbrk(implode('', $this->password), self::$pw_ambiguous) !== false) {
+                        continue;
                     }
                 }
 
@@ -364,26 +423,16 @@ class PWGen
     }
 
     /**
-     * Generate a random number n, where $min <= n < $max
-     * mcrypt's RNG is used if the mcrypt extension has been installed.
-     * Mersenne Twister is used as a cryptographically insecure fallback algorithm.
+     * Generate a random number using the cryptographically secure php7 random_int function
+     *
+     * @param int $min
+     * @param int $max
+     *
+     * @return bool|int
      */
-    public static function my_rand($min=0, $max=0) {
-        if ($min > $max) {
-            return false;
-        }
-        if (function_exists('mcrypt_create_iv')) {
-            $rnd = unpack('L',mcrypt_create_iv(4,MCRYPT_DEV_URANDOM));
-            // Because you can't unpack an unsigned long on a 32bit system (or rather, you can,
-            // but it won't be unsigned), we need to clear the sign bit. mt_getrandmax() seems to
-            // be 2147483647 (0x7FFFFFFF) on all platforms I've tested, so this doesn't change the
-            // supported range.
-            $rnd = $rnd[1] & 0x7FFFFFFF;
-            return $rnd % (1 + $max - $min) + $min;
-        } else {
-            // fall back on cryptographically insecure rng
-            return mt_rand($min, $max);
-        }
+    public static function my_rand($min = 0, $max = 0)
+    {
+        return random_int($min, $max);
     }
 
     /**
@@ -449,6 +498,8 @@ class PWGen
 
     /**
      * Returns the last generated password. If there is none, a new one will be generated.
+     *
+     * @return string
      */
     public function __toString()
     {
