@@ -17,4 +17,4 @@ class PWElement
         $this->str   = $str;
         $this->flags = $flags;
     }
-} 
+}
