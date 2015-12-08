@@ -29,12 +29,12 @@ class PWGen
     /**
      * @var string
      */
-    private $pwgen;
+    private $method;
 
     /**
      * @var int
      */
-    private $pwgen_flags;
+    private $flags;
 
     /**
      * @var array|string
@@ -44,7 +44,7 @@ class PWGen
     /**
      * @var int
      */
-    private $pw_length;
+    private $length;
 
     private static $initialized = false; // static block alread called?
     private static $elements;
@@ -67,7 +67,7 @@ class PWGen
      *                         passwords significantly, and as such reduces the quality of the passwords.
      *                         It may be useful for users who have bad vision, but in general use of this
      *                         option is not recommended.
-     * @param bool $no_vowels  Generate random passwords that do not contain vowels or numbers that might be
+     * @param bool $noVowels   Generate random passwords that do not contain vowels or numbers that might be
      *                         mistaken for vowels. It provides less secure passwords to allow system
      *                         administrators to not have to worry with random passwords accidentally contain
      *                         offensive substrings.
@@ -79,19 +79,19 @@ class PWGen
         $numerals = true,
         $capitalize = true,
         $ambiguous = false,
-        $no_vowels = false,
+        $noVowels = false,
         $symbols = false
     ) {
         self::staticInit();
 
-        $this->pwgen = 'pw_phonemes';
+        $this->method = 'pw_phonemes';
 
         $this->setLength($length);
         $this->setSecure($secure);
         $this->setNumerals($numerals);
         $this->setCapitalize($capitalize);
         $this->setAmbiguous($ambiguous);
-        $this->setNoVowels($no_vowels);
+        $this->setNoVowels($noVowels);
         $this->setSymbols($symbols);
     }
 
@@ -105,18 +105,18 @@ class PWGen
     public function setLength($length)
     {
         if (is_numeric($length) && $length > 0) {
-            $this->pw_length = $length;
-            if ($this->pw_length < 5) {
-                $this->pwgen = 'pw_rand';
+            $this->length = $length;
+            if ($this->length < 5) {
+                $this->method = 'pw_rand';
             }
-            if ($this->pw_length <= 2) {
+            if ($this->length <= 2) {
                 $this->setCapitalize(false);
             }
-            if ($this->pw_length <= 1) {
+            if ($this->length <= 1) {
                 $this->setNumerals(false);
             }
         } else {
-            $this->pw_length = 8;
+            $this->length = 8;
         }
 
         return $this;
@@ -136,11 +136,11 @@ class PWGen
     public function setSecure($secure)
     {
         if ($secure) {
-            $this->pwgen = 'pw_rand';
+            $this->method = 'pw_rand';
             $this->setNumerals(true);
             $this->setCapitalize(true);
         } else {
-            $this->pwgen = 'pw_phonemes';
+            $this->method = 'pw_phonemes';
         }
 
         return $this;
@@ -156,9 +156,9 @@ class PWGen
     public function setNumerals($numerals)
     {
         if ($numerals) {
-            $this->pwgen_flags |= self::PW_DIGITS;
+            $this->flags |= self::PW_DIGITS;
         } else {
-            $this->pwgen_flags &= ~self::PW_DIGITS;
+            $this->flags &= ~self::PW_DIGITS;
         }
 
         return $this;
@@ -174,9 +174,9 @@ class PWGen
     public function setCapitalize($capitalize)
     {
         if ($capitalize) {
-            $this->pwgen_flags |= self::PW_UPPERS;
+            $this->flags |= self::PW_UPPERS;
         } else {
-            $this->pwgen_flags &= ~self::PW_UPPERS;
+            $this->flags &= ~self::PW_UPPERS;
         }
 
         return $this;
@@ -195,9 +195,9 @@ class PWGen
     public function setAmbiguous($ambiguous)
     {
         if ($ambiguous) {
-            $this->pwgen_flags |= self::PW_AMBIGUOUS;
+            $this->flags |= self::PW_AMBIGUOUS;
         } else {
-            $this->pwgen_flags &= ~self::PW_AMBIGUOUS;
+            $this->flags &= ~self::PW_AMBIGUOUS;
         }
 
         return $this;
@@ -215,11 +215,11 @@ class PWGen
     public function setNoVowels($noVowels)
     {
         if ($noVowels) {
-            $this->pwgen = 'pw_rand';
-            $this->pwgen_flags |= self::NO_VOWELS | self::PW_DIGITS | self::PW_UPPERS;
+            $this->method = 'pw_rand';
+            $this->flags |= self::NO_VOWELS | self::PW_DIGITS | self::PW_UPPERS;
         } else {
-            $this->pwgen = 'pw_phonemes';
-            $this->pwgen_flags &= ~self::NO_VOWELS;
+            $this->method = 'pw_phonemes';
+            $this->flags &= ~self::NO_VOWELS;
         }
 
         return $this;
@@ -233,9 +233,9 @@ class PWGen
     public function setSymbols($symbols)
     {
         if ($symbols) {
-            $this->pwgen_flags |= self::PW_SYMBOLS;
+            $this->flags |= self::PW_SYMBOLS;
         } else {
-            $this->pwgen_flags &= ~self::PW_SYMBOLS;
+            $this->flags &= ~self::PW_SYMBOLS;
         }
 
         return $this;
@@ -246,27 +246,27 @@ class PWGen
      */
     public function generate()
     {
-        if ($this->pwgen == 'pw_phonemes') {
-            $this->pw_phonemes();
+        if ($this->method == 'pw_phonemes') {
+            $this->generatePhonemesPassword();
         } else { // $this->pwgen == 'pw_rand'
-            $this->pw_rand();
+            $this->generateRandomPassword();
         }
 
         return $this->password;
     }
 
-    private function pw_phonemes()
+    private function generatePhonemesPassword()
     {
         $this->password = array();
 
         do {
-            $feature_flags = $this->pwgen_flags;
+            $feature_flags = $this->flags;
             $c             = 0;
             $prev          = 0;
             $should_be     = random_int(0, 1) ? self::VOWEL : self::CONSONANT;
             $first         = 1;
 
-            while ($c < $this->pw_length) {
+            while ($c < $this->length) {
                 $i     = random_int(0, count(self::$elements) - 1);
                 $str   = self::$elements[$i]->str;
                 $len   = strlen($str);
@@ -287,7 +287,7 @@ class PWGen
                     continue;
                 }
                 // Don't allow us to overflow the buffer
-                if ($len > $this->pw_length - $c) {
+                if ($len > $this->length - $c) {
                     continue;
                 }
 
@@ -300,7 +300,7 @@ class PWGen
                 }
 
                 // Handle PW_UPPERS
-                if ($this->pwgen_flags & self::PW_UPPERS) {
+                if ($this->flags & self::PW_UPPERS) {
                     if (($first || $flags & self::CONSONANT) && (random_int(0, 9) < 2)) {
                         $this->password[$c] = strtoupper($this->password[$c]);
                         $feature_flags &= ~self::PW_UPPERS;
@@ -308,7 +308,7 @@ class PWGen
                 }
 
                 // Handle the AMBIGUOUS flag
-                if ($this->pwgen_flags & self::PW_AMBIGUOUS) {
+                if ($this->flags & self::PW_AMBIGUOUS) {
                     if (strpbrk(implode('', $this->password), self::$pw_ambiguous) !== false) {
                         continue;
                     }
@@ -317,16 +317,16 @@ class PWGen
                 $c += $len;
 
                 // Time to stop?
-                if ($c >= $this->pw_length) {
+                if ($c >= $this->length) {
                     break;
                 }
 
                 // Handle PW_DIGITS
-                if ($this->pwgen_flags & self::PW_DIGITS) {
+                if ($this->flags & self::PW_DIGITS) {
                     if (!$first && (random_int(0, 9) < 3)) {
                         do {
                             $ch = strval(random_int(0, 9));
-                        } while (($this->pwgen_flags & self::PW_AMBIGUOUS) &&
+                        } while (($this->flags & self::PW_AMBIGUOUS) &&
                             strpos(self::$pw_ambiguous, $ch) !== false);
                         $this->password[$c++] = $ch;
                         $feature_flags &= ~self::PW_DIGITS;
@@ -339,14 +339,14 @@ class PWGen
                 }
 
                 // Handle PW_SYMBOLS
-                if ($this->pwgen_flags & self::PW_SYMBOLS) {
+                if ($this->flags & self::PW_SYMBOLS) {
                     if (!$first && (random_int(0, 9) < 2)) {
                         do {
                             $ch = self::$pw_symbols[random_int(
                                 0,
                                 strlen(self::$pw_symbols) - 1
                             )];
-                        } while (($this->pwgen_flags & self::PW_AMBIGUOUS) &&
+                        } while (($this->flags & self::PW_AMBIGUOUS) &&
                             strpos(self::$pw_ambiguous, $ch) !== false);
                         $this->password[$c++] = $ch;
                         $feature_flags &= ~self::PW_SYMBOLS;
@@ -373,35 +373,35 @@ class PWGen
         $this->password = implode('', $this->password);
     }
 
-    private function pw_rand()
+    private function generateRandomPassword()
     {
         $this->password = array();
 
         $chars = '';
-        if ($this->pwgen_flags & self::PW_DIGITS) {
+        if ($this->flags & self::PW_DIGITS) {
             $chars .= self::$pw_digits;
         }
-        if ($this->pwgen_flags & self::PW_UPPERS) {
+        if ($this->flags & self::PW_UPPERS) {
             $chars .= self::$pw_uppers;
         }
         $chars .= self::$pw_lowers;
-        if ($this->pwgen_flags & self::PW_SYMBOLS) {
+        if ($this->flags & self::PW_SYMBOLS) {
             $chars .= self::$pw_symbols;
         }
 
         do {
             $len           = strlen($chars);
-            $feature_flags = $this->pwgen_flags;
+            $feature_flags = $this->flags;
             $i             = 0;
 
-            while ($i < $this->pw_length) {
+            while ($i < $this->length) {
                 $ch = $chars[random_int(0, $len - 1)];
-                if (($this->pwgen_flags & self::PW_AMBIGUOUS) &&
+                if (($this->flags & self::PW_AMBIGUOUS) &&
                     strpos(self::$pw_ambiguous, $ch) !== false
                 ) {
                     continue;
                 }
-                if (($this->pwgen_flags & self::NO_VOWELS) &&
+                if (($this->flags & self::NO_VOWELS) &&
                     strpos(self::$pw_vowels, $ch) !== false
                 ) {
                     continue;
@@ -492,6 +492,4 @@ class PWGen
     {
         return (empty($this->password) ? $this->generate() : $this->password);
     }
-
 }
-
