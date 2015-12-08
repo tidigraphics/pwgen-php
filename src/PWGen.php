@@ -263,11 +263,11 @@ class PWGen
             $feature_flags = $this->pwgen_flags;
             $c             = 0;
             $prev          = 0;
-            $should_be     = self::my_rand(0, 1) ? self::VOWEL : self::CONSONANT;
+            $should_be     = random_int(0, 1) ? self::VOWEL : self::CONSONANT;
             $first         = 1;
 
             while ($c < $this->pw_length) {
-                $i     = self::my_rand(0, count(self::$elements) - 1);
+                $i     = random_int(0, count(self::$elements) - 1);
                 $str   = self::$elements[$i]->str;
                 $len   = strlen($str);
                 $flags = self::$elements[$i]->flags;
@@ -301,7 +301,7 @@ class PWGen
 
                 // Handle PW_UPPERS
                 if ($this->pwgen_flags & self::PW_UPPERS) {
-                    if (($first || $flags & self::CONSONANT) && (self::my_rand(0, 9) < 2)) {
+                    if (($first || $flags & self::CONSONANT) && (random_int(0, 9) < 2)) {
                         $this->password[$c] = strtoupper($this->password[$c]);
                         $feature_flags &= ~self::PW_UPPERS;
                     }
@@ -323,9 +323,9 @@ class PWGen
 
                 // Handle PW_DIGITS
                 if ($this->pwgen_flags & self::PW_DIGITS) {
-                    if (!$first && (self::my_rand(0, 9) < 3)) {
+                    if (!$first && (random_int(0, 9) < 3)) {
                         do {
-                            $ch = strval(self::my_rand(0, 9));
+                            $ch = strval(random_int(0, 9));
                         } while (($this->pwgen_flags & self::PW_AMBIGUOUS) &&
                             strpos(self::$pw_ambiguous, $ch) !== false);
                         $this->password[$c++] = $ch;
@@ -333,16 +333,16 @@ class PWGen
 
                         $first     = 1;
                         $prev      = 0;
-                        $should_be = self::my_rand(0, 1) ? self::VOWEL : self::CONSONANT;
+                        $should_be = random_int(0, 1) ? self::VOWEL : self::CONSONANT;
                         continue;
                     }
                 }
 
                 // Handle PW_SYMBOLS
                 if ($this->pwgen_flags & self::PW_SYMBOLS) {
-                    if (!$first && (self::my_rand(0, 9) < 2)) {
+                    if (!$first && (random_int(0, 9) < 2)) {
                         do {
-                            $ch = self::$pw_symbols[self::my_rand(
+                            $ch = self::$pw_symbols[random_int(
                                 0,
                                 strlen(self::$pw_symbols) - 1
                             )];
@@ -358,7 +358,7 @@ class PWGen
                     $should_be = self::VOWEL;
                 } else { // should_be == VOWEL
                     if (($prev & self::VOWEL) || ($flags & self::DIPHTHONG) ||
-                        (self::my_rand(0, 9) > 3)
+                        (random_int(0, 9) > 3)
                     ) {
                         $should_be = self::CONSONANT;
                     } else {
@@ -395,7 +395,7 @@ class PWGen
             $i             = 0;
 
             while ($i < $this->pw_length) {
-                $ch = $chars[self::my_rand(0, $len - 1)];
+                $ch = $chars[random_int(0, $len - 1)];
                 if (($this->pwgen_flags & self::PW_AMBIGUOUS) &&
                     strpos(self::$pw_ambiguous, $ch) !== false
                 ) {
@@ -420,19 +420,6 @@ class PWGen
         } while ($feature_flags & (self::PW_UPPERS | self::PW_DIGITS | self::PW_SYMBOLS));
 
         $this->password = implode('', $this->password);
-    }
-
-    /**
-     * Generate a random number using the cryptographically secure php7 random_int function
-     *
-     * @param int $min
-     * @param int $max
-     *
-     * @return bool|int
-     */
-    public static function my_rand($min = 0, $max = 0)
-    {
-        return random_int($min, $max);
     }
 
     /**
