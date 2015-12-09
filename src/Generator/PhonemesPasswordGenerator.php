@@ -40,7 +40,7 @@ class PhonemesPasswordGenerator extends AbstractGenerator
      *
      * @return SecurePasswordGenerator
      */
-    public function create($flags, $length)
+    public static function create($flags, $length)
     {
         return new self($flags, $length);
     }
