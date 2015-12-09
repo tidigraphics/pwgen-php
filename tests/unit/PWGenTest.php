@@ -2,12 +2,12 @@
 
 namespace PWGen\Tests;
 
-use PWGen\PWGen;
+use PWGen\PasswordGenerator;
 
 class PWGenTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var PWGen
+     * @var PasswordGenerator
      */
     private $pwGen;
 
@@ -20,7 +20,7 @@ class PWGenTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->pwGen = new PWGen();
+        $this->pwGen = new PasswordGenerator();
     }
 
     public function testSetSymbols()
@@ -52,7 +52,7 @@ class PWGenTest extends \PHPUnit_Framework_TestCase
 
     public function testSetAmbiguous()
     {
-        $this->pwGen = new PWGen();
+        $this->pwGen = new PasswordGenerator();
         $this->pwGen->setAmbiguous(true);
 
         for ($i =0; $i<10; $i++) {
