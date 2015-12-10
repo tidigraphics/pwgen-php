@@ -9,9 +9,9 @@ Generating a password is as simple as creating a new PWGen object and invoking t
 
 ## Generating a Password
     <?php
-        use PWGen\PWGen;
+        use PWGen\PasswordGenerator;
     
-        $pwgen = new PWGen();
+        $pwgen = new PasswordGenerator();
         $password = $pwgen->generate();
         echo $password;
     ?>
@@ -20,7 +20,7 @@ The output could be Theik0Sa, for example.
 ## Generating Lots of Passwords
 If you want to generate several passwords, it's wise in terms of performance and memory consumption, to use an existing $pwgen object multiple times. Every time you invoke the generate() function, a new password is generated.
 
-    $pwgen = new PWGen();
+    $pwgen = new PasswordGenerator();
     for ($i=0; $i < 1000000; $i++) {
         $password = $pwgen->generate();
         echo $password;
