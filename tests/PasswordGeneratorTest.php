@@ -174,7 +174,7 @@ class PasswordGeneratorTest extends TestCase
 
         $pass = $generator->generate();
 
-        $this->assertIsString($pass);
+        $this->assertInternalType('string', $pass);
         $this->assertEquals(20, strlen($pass));
         $this->assertRegExp('/[a-z]/', $pass); // Alpha lower
         $this->assertRegExp('/[A-Z]/', $pass); // Alpha upper
@@ -191,7 +191,7 @@ class PasswordGeneratorTest extends TestCase
 
         $pass = $generator->generate();
 
-        $this->assertIsString($pass);
+        $this->assertInternalType('string', $pass);
         $this->assertEquals(20, strlen($pass));
         $this->assertRegExp('/[a-z]/', $pass); // Alpha lower
         $this->assertRegExp('/[A-Z]/', $pass); // Alpha upper
@@ -208,7 +208,7 @@ class PasswordGeneratorTest extends TestCase
 
         $pass = $generator->generate();
 
-        $this->assertIsString($pass);
+        $this->assertInternalType('string', $pass);
         $this->assertEquals(20, strlen($pass));
         $this->assertRegExp('/[a-z]/', $pass); // Alpha lower
         $this->assertNotRegExp('/[A-Z]/', $pass); // Alpha NOT upper
@@ -224,7 +224,7 @@ class PasswordGeneratorTest extends TestCase
 
         $pass = $generator->generate();
 
-        $this->assertIsString($pass);
+        $this->assertInternalType('string', $pass);
         $this->assertEquals(20, strlen($pass));
         $this->assertRegExp('/[a-z]/', $pass); // Alpha lower
         $this->assertRegExp('/[A-Z]/', $pass); // Alpha upper
@@ -241,7 +241,7 @@ class PasswordGeneratorTest extends TestCase
 
         $pass = $generator->generate();
 
-        $this->assertIsString($pass);
+        $this->assertInternalType('string', $pass);
         $this->assertEquals(20, strlen($pass));
         $this->assertRegExp('/[a-z]/', $pass); // Alpha lower
         $this->assertRegExp('/[A-Z]/', $pass); // Alpha NOT upper
@@ -259,7 +259,7 @@ class PasswordGeneratorTest extends TestCase
 
         $pass = $generator->generate();
 
-        $this->assertIsString($pass);
+        $this->assertInternalType('string', $pass);
         $this->assertEquals(20, strlen($pass));
         $this->assertRegExp('/[a-z]/', $pass); // Alpha lower
         $this->assertRegExp('/[A-Z]/', $pass); // Alpha upper
@@ -276,7 +276,7 @@ class PasswordGeneratorTest extends TestCase
 
         $pass = $generator->generate();
 
-        $this->assertIsString($pass);
+        $this->assertInternalType('string', $pass);
         $this->assertEquals(20, strlen($pass));
         $this->assertRegExp('/[a-z]/', $pass); // Alpha lower
         $this->assertNotRegExp('/[A-Z]/', $pass); // Alpha NOT upper
