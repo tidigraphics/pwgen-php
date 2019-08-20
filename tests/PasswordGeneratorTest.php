@@ -7,11 +7,6 @@ use PWGen\PasswordGenerator;
 
 class PasswordGeneratorTest extends TestCase
 {
-    /**
-     * @var PasswordGenerator
-     */
-    private $generator;
-
     private $pwAmbiguous = 'B8G6I1l0OQDS5Z2';
     private $pwSymbols   = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
     private $pwDigits    = '0123456789';
@@ -19,18 +14,15 @@ class PasswordGeneratorTest extends TestCase
     private $pwLowers    = 'abcdefghijklmnopqrstuvwxyz';
     private $pwVowels    = '01aeiouyAEIOUY';
 
-    public function setUp(): void
-    {
-        $this->generator = PasswordGenerator::create();
-    }
-
     public function testSetCapitalize()
     {
-        $this->generator->setCapitalize(true);
+        $generator = new PasswordGenerator();
 
-        $password = $this->generator->generate();
+        $generator->setCapitalize(true);
 
-        $this->assertTrue($this->generator->hasCapitalize());
+        $password = $generator->generate();
+
+        $this->assertTrue($generator->hasCapitalize());
         $this->assertNotFalse(strpbrk($password, $this->pwUppers));
     }
 
@@ -47,68 +39,72 @@ class PasswordGeneratorTest extends TestCase
 
     public function testSetSecure()
     {
-        $this->generator->setSecure(true);
+        $generator = new PasswordGenerator();
 
-        $this->assertTrue($this->generator->isSecure());
+        $generator->setSecure(true);
+
+        $this->assertTrue($generator->isSecure());
     }
 
 
     public function testSetSymbols()
     {
-        $this->generator->setSymbols(true);
+        $generator = new PasswordGenerator();
+        $generator->setSymbols(true);
 
-        $password = $this->generator->generate();
+        $password = $generator->generate();
 
         $this->assertNotFalse(strpbrk($password, $this->pwSymbols));
     }
 
     public function testSetNumerals()
     {
-        $this->generator->setNumerals(true);
-        $this->assertTrue($this->generator->hasNumerals());
+        $generator = new PasswordGenerator();
+        $generator->setNumerals(true);
+        $this->assertTrue($generator->hasNumerals());
 
-        $password = $this->generator->generate();
+        $password = $generator->generate();
         $this->assertNotFalse(strpbrk($password, $this->pwDigits));
     }
 
 
     public function testSetAmbiguous()
     {
-        $this->generator = PasswordGenerator::create();
-        $this->generator->setAmbiguous(true);
+        $generator = PasswordGenerator::create();
+        $generator->setAmbiguous(true);
 
-        $this->assertTrue($this->generator->hasAmbiguous());
+        $this->assertTrue($generator->hasAmbiguous());
 
         for ($i = 0; $i < 10; $i++) {
-            $password = $this->generator->generate();
+            $password = $generator->generate();
             $this->assertFalse(strpbrk($password, $this->pwAmbiguous));
         }
 
-        $this->generator->setCapitalize(true);
+        $generator->setCapitalize(true);
 
         for ($i = 0; $i < 10; $i++) {
-            $password = $this->generator->generate();
+            $password = $generator->generate();
             $this->assertFalse(strpbrk($password, $this->pwAmbiguous));
         }
 
-        $this->generator->setNumerals(true);
+        $generator->setNumerals(true);
 
         for ($i = 0; $i < 10; $i++) {
-            $password = $this->generator->generate();
+            $password = $generator->generate();
             $this->assertFalse(strpbrk($password, $this->pwAmbiguous));
         }
 
-        $this->generator->setSymbols(true);
+        $generator->setSymbols(true);
 
         for ($i = 0; $i < 10; $i++) {
-            $password = $this->generator->generate();
+            $password = $generator->generate();
             $this->assertFalse(strpbrk($password, $this->pwAmbiguous));
         }
 
-        $this->generator->setSecure(true);
+        $generator->setSecure(true);
 
         for ($i = 0; $i < 10; $i++) {
-            $password = $this->generator->generate();
+            $password = $generator->generate();
             $this->assertFalse(strpbrk($password, $this->pwAmbiguous));
         }
     }
@@ -118,49 +114,54 @@ class PasswordGeneratorTest extends TestCase
      */
     public function testSetLength($pwdLength, $expectedLength)
     {
-        $this->generator->setLength($pwdLength);
-        $this->assertEquals($expectedLength, $this->generator->getLength());
+        $generator = new PasswordGenerator();
+
+        $generator->setLength($pwdLength);
+        $this->assertEquals($expectedLength, $generator->getLength());
 
 
         for ($i = 0; $i < 10; $i++) {
-            $password = $this->generator->generate();
+            $password = $generator->generate();
             $this->assertEquals($expectedLength, strlen($password));
         }
         //if length < 5 it should use pw_rand
-        $this->generator->setLength(4);
+        $generator->setLength(4);
 
         //if length <= 2 there should not be any capitals
-        $this->generator->setCapitalize(true);
-        $this->generator->setLength(2);
-        $password = $this->generator->generate();
+        $generator->setCapitalize(true);
+        $generator->setLength(2);
+        $password = $generator->generate();
         $this->assertFalse((bool)strpbrk($password, $this->pwUppers));
 
         //if length <= 1 there should not be any numerals
-        $this->generator->setCapitalize(true);
-        $this->generator->setNumerals(true);
-        $this->generator->setLength(1);
-        $password = $this->generator->generate();
+        $generator->setCapitalize(true);
+        $generator->setNumerals(true);
+        $generator->setLength(1);
+        $password = $generator->generate();
         $this->assertFalse((bool)strpbrk($password, $this->pwDigits));
 
-        $this->generator->setLength('bla');
-        $password = $this->generator->generate();
+        $generator->setLength('bla');
+        $password = $generator->generate();
         $this->assertEquals(8, strlen($password));
 
     }
 
     public function testSetNoVowels()
     {
-        $this->generator->setNoVowels(true);
+        $generator = new PasswordGenerator();
 
-        $password = $this->generator->generate();
+        $generator->setNoVowels(true);
 
-        $this->assertTrue($this->generator->hasNoVovels());
+        $password = $generator->generate();
+
+        $this->assertTrue($generator->hasNoVovels());
         $this->assertFalse(strpbrk($password, $this->pwVowels));
     }
 
-    public function test__ToString()
+    public function testToString()
     {
-        $this->assertEquals($this->generator->generate(), (string)$this->generator);
+        $generator = new PasswordGenerator();
+        $this->assertEquals($generator->generate(), (string)$generator);
     }
 
 
