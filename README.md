@@ -109,3 +109,4 @@ pwgen-php may be distributed under the terms of the GPL License.
 Copyright © 2009 by Superwayne <superwayne@superwayne.org> (PHP port)
 Copyright © 2009 by Superwayne <superwayne@superwayne.org> (PHP port)
 Copyright © 2001, 2002 by Theodore Ts'o <tytso@alum.mit.edu> (C version)
+

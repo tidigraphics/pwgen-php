@@ -26,4 +26,29 @@ interface GeneratorInterface
      * @return string
      */
     public function generate();
+
+    /**
+     * @return string
+     */
+    public function getAmbiguous();
+
+    /**
+     * @return string
+     */
+    public function getSymbols();
+
+    /**
+     * @return string
+     */
+    public function getVowels();
+
+    /**
+     * @return int
+     */
+    public function getLength();
+
+    /**
+     * @return int
+     */
+    public function getFlags();
 }

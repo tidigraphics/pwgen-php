@@ -43,6 +43,10 @@ class PasswordGenerator
      */
     private $elements;
 
+    /**
+     * @var GeneratorInterface
+     */
+    private $generator;
 
     /**
      * @param int  $length     Length of the generated password. Default: 8
@@ -148,6 +152,14 @@ class PasswordGenerator
     }
 
     /**
+     * @return int
+     */
+    public function getLength()
+    {
+        return $this->length;
+    }
+
+    /**
      * Generate completely random, hard-to-memorize passwords. These should only used for machine passwords,
      * since otherwise it's almost guaranteed that users will simply write the password on a piece of paper
      * taped to the monitor...
@@ -172,6 +184,16 @@ class PasswordGenerator
     }
 
     /**
+     * @return bool
+     */
+    public function isSecure()
+    {
+        return ($this->flags & GeneratorInterface::FLAG_DIGITS) === GeneratorInterface::FLAG_DIGITS &&
+            ($this->flags & GeneratorInterface::FLAG_UPPERS) === GeneratorInterface::FLAG_UPPERS
+        ;
+    }
+
+    /**
      * Include at least one number in the password. This is the default.
      *
      * @param bool $numerals
@@ -187,6 +209,14 @@ class PasswordGenerator
         }
 
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasNumerals()
+    {
+        return ($this->flags & GeneratorInterface::FLAG_DIGITS) === GeneratorInterface::FLAG_DIGITS;
     }
 
     /**
@@ -208,6 +238,14 @@ class PasswordGenerator
     }
 
     /**
+     * @return bool
+     */
+    public function hasCapitalize()
+    {
+        return ($this->flags & GeneratorInterface::FLAG_UPPERS) === GeneratorInterface::FLAG_UPPERS;
+    }
+
+    /**
      * Don't use characters that could be confused by the user when printed, such as 'l' and '1', or '0' or
      * 'O'. This reduces the number of possible passwords significantly, and as such reduces the quality of
      * the passwords. It may be useful for users who have bad vision, but in general use of this option is
@@ -226,6 +264,14 @@ class PasswordGenerator
         }
 
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasAmbiguous()
+    {
+        return ($this->flags & GeneratorInterface::FLAG_AMBIGUOUS) === GeneratorInterface::FLAG_AMBIGUOUS;
     }
 
     /**
@@ -251,6 +297,17 @@ class PasswordGenerator
     }
 
     /**
+     * @return bool
+     */
+    public function hasNoVovels()
+    {
+        return ($this->flags & GeneratorInterface::FLAG_NO_VOWELS) === GeneratorInterface::FLAG_NO_VOWELS &&
+            ($this->flags & GeneratorInterface::FLAG_DIGITS) === GeneratorInterface::FLAG_DIGITS &&
+            ($this->flags & GeneratorInterface::FLAG_UPPERS) === GeneratorInterface::FLAG_UPPERS
+            ;
+    }
+
+    /**
      * @param bool $symbols
      *
      * @return $this
@@ -267,15 +324,44 @@ class PasswordGenerator
     }
 
     /**
+     * @return bool
+     */
+    public function hasSymbols()
+    {
+        return ($this->flags & GeneratorInterface::FLAG_SYMBOLS) === GeneratorInterface::FLAG_SYMBOLS;
+    }
+
+    private function createGenerator()
+    {
+        if ($this->method == 'phonemes') {
+            return PhonemesPasswordGenerator::create($this->flags, $this->length);
+        } else { // $this->method == 'random'
+            return SecurePasswordGenerator::create($this->flags, $this->length);
+        }
+    }
+
+    /**
+     * @return GeneratorInterface
+     */
+    public function getGenerator()
+    {
+        if (null === $this->generator) {
+            $this->generator = $this->createGenerator();
+        }
+
+        if ($this->generator->getFlags() !== $this->flags || $this->generator->getLength() !== $this->length) {
+            $this->generator = $this->createGenerator();
+        }
+
+        return $this->generator;
+    }
+
+    /**
      * @return string
      */
     public function generate()
     {
-        if ($this->method == 'phonemes') {
-            $this->password = PhonemesPasswordGenerator::create($this->flags, $this->length)->generate();
-        } else { // $this->method == 'random'
-            $this->password = SecurePasswordGenerator::create($this->flags, $this->length)->generate();
-        }
+        $this->password = $this->getGenerator()->generate();
 
         return $this->password;
     }
